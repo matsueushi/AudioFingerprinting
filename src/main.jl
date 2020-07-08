@@ -13,7 +13,7 @@ function hann(n_window)
     xs_hann
 end
 
-function spectrogram(window_size, signal)
+function spectrogram(signal; window_size = 1024)
     overlap = window_size ÷ 2
     rs = 1:(window_size - overlap):Base.length(signal) - window_size
     data = Matrix{Float64}(undef, overlap + 1, Base.length(rs))
@@ -60,16 +60,15 @@ function generate_hashes(peak_data)
 end
 
 
-function main()
-    window_size = 1024
+function main(wav_name)
     println("loading wav...")
-    y, Fs, nbits, opt = wavread("wav/01 Windowlicker.wav")
+    y, Fs, nbits, opt = wavread(wav_name)
     signal = mean(y, dims=2)
     println("creating spectrogram...")
-    data = spectrogram(window_size, signal)
+    data = spectrogram(signal)[:, end-2000:end-800]
 
     println("applying max filter...")
-    data_plot = log.(data[:, end-2000:end-800])
+    data_plot = log.(data)
     min_data, max_data = minimum(data_plot), maximum(data_plot)
     heatmap_data = @. (data_plot - min_data)/(max_data - min_data)
     n = 49
@@ -85,16 +84,16 @@ function main()
 
     heatmap(cropped_data, margin=2mm)
     scatter!(peak_data[:, 2], peak_data[:, 1], label="", markercolor=:blue)
-    savefig("plot_peaks.png")
+    savefig("results/plot_peaks.png")
 
     surface(cropped_data)
-    savefig("surface.png")
+    savefig("results/surface.png")
 
     # println("saving images...")
-    # save("image.png", colorview(Gray, 1 .- heatmap_data))
-    # save("image_max.png", colorview(Gray, 1 .- heatmap_data_max))
+    # save("results/image.png", colorview(Gray, 1 .- heatmap_data))
+    # save("results/image_max.png", colorview(Gray, 1 .- heatmap_data_max))
 end
 
-main()
+main("wav/03 Roots Of Summer.wav")
 
 end # module
