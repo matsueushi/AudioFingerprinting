@@ -27,16 +27,12 @@ end
 
 function max_filter(n, spc)
     data_max = zero(spc)
-    for i in 1:size(spc)[1]
-        for j in 1:size(spc)[2] - n
-            data_max[i, j] = maximum(view(spc, i:i, j:j + n))
-        end
+    for j in 1:size(spc)[2] - n
+        data_max[:, j] = maximum(view(spc, :, j:j + n), dims=2)
     end
 
     for i in 1:size(spc)[1] - n
-        for j in 1:size(spc)[2] - n
-            data_max[i, j] = maximum(view(data_max, i:i + n, j:j))
-        end
+        data_max[i, :] = maximum(view(data_max, i:i + n, :), dims=1)
     end
     data_max[1:end + 1 - n, 1:end + 1 - n]
 end
