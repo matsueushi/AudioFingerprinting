@@ -7,31 +7,31 @@ using Statistics
 using Measures
 using WAV
 
-function hann(n_window)
-    ns = 0:n_window
-    xs_hann = @. 0.5 * (1 - cos(2π * ns / n_window))
+function hann(window_size)
+    ns = 0:window_size
+    xs_hann = @. 0.5 * (1 - cos(2π * ns / window_size))
     xs_hann
 end
 
 function spectrogram(signal; window_size = 1024)
     overlap = window_size ÷ 2
     rs = 1:(window_size - overlap):Base.length(signal) - window_size
-    data = Matrix{Float64}(undef, overlap + 1, Base.length(rs))
+    spc = Matrix{Float64}(undef, overlap + 1, Base.length(rs))
     hann_window = hann(window_size)
     for (i, idx) in enumerate(rs)
         rfft_result = rfft(hann_window .* view(signal, idx:idx + window_size))
-        data[:, i] = abs.(rfft_result).^2
+        spc[:, i] = abs.(rfft_result).^2
     end
-    data
+    spc
 end
 
 function max_filter(n, spc)
     data_max = zero(spc)
-    for j in 1:size(spc)[2] - n
+    for j in 1:size(spc, 2) - n
         data_max[:, j] = maximum(view(spc, :, j:j + n), dims=2)
     end
 
-    for i in 1:size(spc)[1] - n
+    for i in 1:size(spc, 1) - n
         data_max[i, :] = maximum(view(data_max, i:i + n, :), dims=1)
     end
     data_max[1:end + 1 - n, 1:end + 1 - n]
