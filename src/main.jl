@@ -55,31 +55,22 @@ function generate_hashes(peak_data)
     hash_dict
 end
 
-
-function main(wav_name)
-    println("loading wav...")
-    y, Fs, nbits, opt = wavread(wav_name)
-    signal = vec(mean(y, dims=2))
-    println("creating spectrogram...")
-    spc = spectrogram(signal)[:, end-2000:end-800]
-
+function find_peaks(spc)
     println("applying max filter...")
-    data_plot = log.(spc)
-    min_data, max_data = minimum(data_plot), maximum(data_plot)
-    heatmap_data = @. (data_plot - min_data)/(max_data - min_data)
+    log_spc = log.(spc)
+    min_data, max_data = minimum(log_spc), maximum(log_spc)
+    heatmap_data = @. (log_spc - min_data)/(max_data - min_data)
     n = 49
     heatmap_data_max = max_filter(n, heatmap_data)
 
     m = (n + 1) ÷ 2
-    cropped_data = heatmap_data[m:end + 1 - m, m:end + 1 - m] 
-    peak = (cropped_data .== heatmap_data_max) .* (cropped_data .> mean(cropped_data))
-    peak_data = getindex.(findall(peak), [1 2])
+    cropped_data = heatmap_data[m:end + 1 - m, m:end + 1 - m]
 
-    hashes = generate_hashes(peak_data)
-    print(hashes)
+    peak_flag = (cropped_data .== heatmap_data_max) .* (cropped_data .> mean(cropped_data))
+    peaks = getindex.(findall(peak_flag), [1 2])
 
     heatmap(cropped_data, margin=2mm)
-    scatter!(peak_data[:, 2], peak_data[:, 1], label="", markercolor=:blue)
+    scatter!(peaks[:, 2], peaks[:, 1], label="", markercolor=:blue)
     savefig("results/plot_peaks.png")
 
     surface(cropped_data)
@@ -88,6 +79,23 @@ function main(wav_name)
     println("saving images...")
     save("results/image.png", colorview(Gray, 1 .- heatmap_data))
     save("results/image_max.png", colorview(Gray, 1 .- heatmap_data_max))
+
+    peaks
+end
+
+
+function main(wav_name)
+    println("loading wav...")
+    y, Fs, nbits, opt = wavread(wav_name)
+    signal = vec(mean(y, dims=2))
+    println("creating spectrogram...")
+    spc = spectrogram(signal)[:, end-2000:end-800]
+    peaks = find_peaks(spc)
+
+    hashes = generate_hashes(peaks)
+    print(hashes)
+
+
 end
 
 main("wav/03 Roots Of Summer.wav")
