@@ -37,26 +37,8 @@ function max_filter(n, spc)
     data_max[1:end + 1 - n, 1:end + 1 - n]
 end
 
-function generate_hashes(peak_data)
-    hash_dict = Dict{UInt32, Int32}()
-    for i in 1:size(peak_data, 1)
-        f1, t1 = peak_data[i, :]
-        for j in i:size(peak_data, 1)
-            f2, t2 = peak_data[j, :]
-            (t1 + 2 < t2 && t2 < t1 + 64) || continue
-            hash = UInt32(f1 << 20 + f2 << 10 + (t2 - t1))
-            # print
-            println("Hash:time = [", f1, ":", f2, ":", t2 - t1, "]:", t1)
-            println(bitstring(f1)[end-9:end], ",", bitstring(f2)[end-9:end], ",", bitstring(t2 - t1)[end-9:end])
-            println(hash, ",", bitstring(hash))
-            hash_dict[hash] = t1
-        end
-    end
-    hash_dict
-end
-
 function find_peaks(spc)
-    println("applying max filter...")
+    # println("applying max filter...")
     log_spc = log.(spc)
     min_data, max_data = minimum(log_spc), maximum(log_spc)
     heatmap_data = @. (log_spc - min_data)/(max_data - min_data)
@@ -67,20 +49,38 @@ function find_peaks(spc)
     cropped_data = heatmap_data[m:end + 1 - m, m:end + 1 - m]
 
     peak_flag = (cropped_data .== heatmap_data_max) .* (cropped_data .> mean(cropped_data))
-    peaks = getindex.(findall(peak_flag), [1 2])
+    peaks = getindex.(findall(peak_flag), [2 1])
 
-    heatmap(cropped_data, margin=2mm)
-    scatter!(peaks[:, 2], peaks[:, 1], label="", markercolor=:blue)
-    savefig("results/plot_peaks.png")
+    # heatmap(cropped_data, margin=2mm)
+    # scatter!(peaks[:, 1], peaks[:, 2], label="", markercolor=:blue)
+    # savefig("results/plot_peaks.png")
 
-    surface(cropped_data)
-    savefig("results/surface.png")
+    # surface(cropped_data)
+    # savefig("results/surface.png")
 
-    println("saving images...")
-    save("results/image.png", colorview(Gray, 1 .- heatmap_data))
-    save("results/image_max.png", colorview(Gray, 1 .- heatmap_data_max))
+    # println("saving images...")
+    # save("results/image.png", colorview(Gray, 1 .- heatmap_data))
+    # save("results/image_max.png", colorview(Gray, 1 .- heatmap_data_max))
 
     peaks
+end
+
+function generate_hashes(peaks)
+    hash_dict = Dict{UInt32, Int32}()
+    for i in 1:size(peaks, 1)
+        t1, f1 = peaks[i, :]
+        for j in i:size(peaks, 1)
+            t2, f2 = peaks[j, :]
+            (t1 + 2 < t2 && t2 < t1 + 64) || continue
+            hash = UInt32(f1 << 20 + f2 << 10 + (t2 - t1))
+            # print
+            # println("Hash:time = [", f1, ":", f2, ":", t2 - t1, "]:", t1)
+            # println(bitstring(f1)[end-9:end], ",", bitstring(f2)[end-9:end], ",", bitstring(t2 - t1)[end-9:end])
+            # println(hash, ",", bitstring(hash))
+            hash_dict[hash] = t1
+        end
+    end
+    hash_dict
 end
 
 
@@ -93,9 +93,7 @@ function main(wav_name)
     peaks = find_peaks(spc)
 
     hashes = generate_hashes(peaks)
-    print(hashes)
-
-
+    # print(hashes)
 end
 
 main("wav/03 Roots Of Summer.wav")
