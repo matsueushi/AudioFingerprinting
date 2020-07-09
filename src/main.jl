@@ -25,16 +25,16 @@ function spectrogram(signal; window_size = 1024)
     data
 end
 
-function max_filter(n, data)
-    data_max = zero(data)
-    for i in 1:size(data)[1]
-        for j in 1:size(data)[2] - n
-            data_max[i, j] = maximum(view(data, i:i, j:j + n))
+function max_filter(n, spc)
+    data_max = zero(spc)
+    for i in 1:size(spc)[1]
+        for j in 1:size(spc)[2] - n
+            data_max[i, j] = maximum(view(spc, i:i, j:j + n))
         end
     end
 
-    for i in 1:size(data)[1] - n
-        for j in 1:size(data)[2] - n
+    for i in 1:size(spc)[1] - n
+        for j in 1:size(spc)[2] - n
             data_max[i, j] = maximum(view(data_max, i:i + n, j:j))
         end
     end
@@ -63,12 +63,12 @@ end
 function main(wav_name)
     println("loading wav...")
     y, Fs, nbits, opt = wavread(wav_name)
-    signal = mean(y, dims=2)
+    signal = vec(mean(y, dims=2))
     println("creating spectrogram...")
-    data = spectrogram(signal)[:, end-2000:end-800]
+    spc = spectrogram(signal)[:, end-2000:end-800]
 
     println("applying max filter...")
-    data_plot = log.(data)
+    data_plot = log.(spc)
     min_data, max_data = minimum(data_plot), maximum(data_plot)
     heatmap_data = @. (data_plot - min_data)/(max_data - min_data)
     n = 49
@@ -89,9 +89,9 @@ function main(wav_name)
     surface(cropped_data)
     savefig("results/surface.png")
 
-    # println("saving images...")
-    # save("results/image.png", colorview(Gray, 1 .- heatmap_data))
-    # save("results/image_max.png", colorview(Gray, 1 .- heatmap_data_max))
+    println("saving images...")
+    save("results/image.png", colorview(Gray, 1 .- heatmap_data))
+    save("results/image_max.png", colorview(Gray, 1 .- heatmap_data_max))
 end
 
 main("wav/03 Roots Of Summer.wav")
