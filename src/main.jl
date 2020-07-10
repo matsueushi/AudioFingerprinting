@@ -25,42 +25,38 @@ function spectrogram(signal; window_size = 1024)
     spc
 end
 
-function max_filter(spc, n)
+function max_filter(spc, m)
     data_max = zero(spc)
-    for j in 1:size(spc, 2) - n
-        data_max[:, j] = maximum(view(spc, :, j:j + n), dims=2)
+    nx = size(spc, 1) - 2 * m
+    ny = size(spc, 2) - 2 * m
+    for j in 1:ny
+        data_max[:, j] = maximum(view(spc, :, j:j + 2 * m), dims=2)
     end
-
-    for i in 1:size(spc, 1) - n
-        data_max[i, :] = maximum(view(data_max, i:i + n, :), dims=1)
+    for i in 1:nx
+        data_max[i, :] = maximum(view(data_max, i:i + 2 * m, :), dims=1)
     end
-    data_max[1:end + 1 - n, 1:end + 1 - n]
+    data_max[1:nx, 1:ny]
 end
 
-function find_peaks(spc, n=49)
+function find_peaks(spc, m=24)
     # println("applying max filter...")
     log_spc = log.(spc)
     min_data, max_data = minimum(log_spc), maximum(log_spc)
     norm_log_spc = @. (log_spc - min_data)/(max_data - min_data)
-    norm_log_spc_max = max_filter(norm_log_spc, n)
 
-    m = (n + 1) ÷ 2
-    center_spc = norm_log_spc[m:end + 1 - m, m:end + 1 - m]
+    norm_log_spc_max = max_filter(norm_log_spc, m)
+    center_spc = norm_log_spc[1 + m:end - m, 1 + m:end - m]
 
-    peak_flag = @. (center_spc == norm_log_spc_max) * (center_spc > mean(center_spc))
+    peak_flag = (center_spc .== norm_log_spc_max) .* (center_spc .> mean(center_spc))
     peaks = getindex.(findall(peak_flag), [2 1])
 
     # heatmap(center_spc, margin=2mm)
     # scatter!(peaks[:, 1], peaks[:, 2], label="", markercolor=:blue)
     # savefig("results/plot_peaks.png")
 
-    # surface(center_spc)
-    # savefig("results/surface.png")
-
     # println("saving images...")
     # save("results/image.png", colorview(Gray, 1 .- norm_log_spc))
     # save("results/image_max.png", colorview(Gray, 1 .- norm_log_spc_max))
-
     peaks
 end
 
@@ -93,7 +89,7 @@ function main(wav_name)
     peaks = find_peaks(spc)
 
     hashes = generate_hashes(peaks)
-    # print(hashes)
+    print(hashes)
 end
 
 main("wav/03 Roots Of Summer.wav")
