@@ -2,10 +2,10 @@ module Hanauta
 
 using FFTW
 using Images
-using Plots
 using Statistics
-using Measures
-using WAV
+
+
+export spectrogram, generate_hashes, find_peaks
 
 function hann(window_size)
     ns = 0:window_size
@@ -13,10 +13,10 @@ function hann(window_size)
     xs_hann
 end
 
-function spectrogram(signal; window_size = 1024)
+function spectrogram(signal; window_size=1024)
     overlap = window_size ÷ 2
     rs = 1:(window_size - overlap):Base.length(signal) - window_size
-    spc = Matrix{Float64}(undef, overlap + 1, Base.length(rs))
+    spc = zeros(overlap + 1, Base.length(rs))
     hann_window = hann(window_size)
     for (i, idx) in enumerate(rs)
         rfft_result = rfft(hann_window .* view(signal, idx:idx + window_size))
@@ -41,7 +41,7 @@ end
 function find_peaks(spc, m=24)
     # println("applying max filter...")
     log_spc = log.(spc)
-    min_data, max_data = minimum(log_spc), maximum(log_spc)
+    min_data, max_data = extrema(log_spc)
     norm_log_spc = @. (log_spc - min_data)/(max_data - min_data)
 
     norm_log_spc_max = max_filter(norm_log_spc, m)
@@ -78,20 +78,5 @@ function generate_hashes(peaks, start=2, stop=64)
     end
     hash_dict
 end
-
-
-function main(wav_name)
-    println("loading wav...")
-    y, Fs, nbits, opt = wavread(wav_name)
-    signal = vec(mean(y, dims=2))
-    println("creating spectrogram...")
-    spc = spectrogram(signal)[:, end-2000:end-800]
-    peaks = find_peaks(spc)
-
-    hashes = generate_hashes(peaks)
-    print(hashes)
-end
-
-main("wav/03 Roots Of Summer.wav")
 
 end # module
