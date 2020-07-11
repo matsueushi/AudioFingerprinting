@@ -5,7 +5,7 @@ using Images
 using Statistics
 
 
-export spectrogram, generate_hashes, find_peaks
+export spectrogram, generate_hashes, find_peaks, find_peak_pairs, pairs_to_hashes
 
 function hann(window_size)
     ns = 0:window_size
@@ -60,22 +60,32 @@ function find_peaks(spc, m=24)
     peaks
 end
 
-function generate_hashes(peaks, start=2, stop=64)
-    hash_dict = Dict{UInt32, UInt32}()
+function find_peak_pairs(peaks, start, stop)
+    pairs = Vector{NTuple{4, Int64}}()
     n_peaks = size(peaks, 1)
     for i in 1:n_peaks
         t1, f1 = peaks[i, :]
         for j in i:n_peaks
             t2, f2 = peaks[j, :]
             (t1 + start < t2 && t2 < t1 + stop) || continue
-            hash = UInt32(f1 << 20 + f2 << 10 + (t2 - t1))
-            # print
-            # println("Hash:time = [", f1, ":", f2, ":", t2 - t1, "]:", t1)
-            # println(bitstring(f1)[end-9:end], ",", bitstring(f2)[end-9:end], ",", bitstring(t2 - t1)[end-9:end])
-            # println(hash, ",", bitstring(hash))
-            hash_dict[hash] = t1
+            push!(pairs, (t1, t2, f1, f2))
         end
     end
+    pairs
+end
+
+function pairs_to_hashes(pairs)
+    hash_dict = Dict{UInt32, UInt32}()
+    for (t1, t2, f1, f2) in pairs
+        hash = UInt32(f1 << 20 + f2 << 10 + (t2 - t1))
+        hash_dict[hash] = t1
+    end
+    hash_dict
+end
+
+function generate_hashes(peaks, start=2, stop=64)
+    pairs = find_peak_pairs(peaks, start, stop)
+    hash_dict = pairs_to_hashes(pairs)
     hash_dict
 end
 
