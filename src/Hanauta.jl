@@ -19,8 +19,11 @@ function spectrogram(signal; window_size=1024, logscale=true)
     end
 
     if logscale
-        non_zero = spc .!= 0
-        spc[non_zero] = log10.(spc[non_zero])
+        zero_mask = spc .== 0
+        nonzero_spc = view(spc, .!zero_mask)
+        min_nonzero_spc = minimum(nonzero_spc)
+        spc[.!zero_mask] = log10.(nonzero_spc)
+        spc[zero_mask] .= log10(min_nonzero_spc)
     end
 
     return spc
@@ -43,7 +46,9 @@ function find_peaks(spc, m)
     spc_max = max_filter(spc, m)
     center_spc = spc[1 + m:end - m, 1 + m:end - m]
 
-    peak_flag = (center_spc .== spc_max) .* (center_spc .> 0)
+    mask = center_spc .!= minimum(center_spc)
+    spc_mean = mean(view(center_spc, mask))
+    peak_flag = (center_spc .== spc_max) .* (center_spc .> spc_mean)
     return getindex.(findall(peak_flag), [2 1])
 end
 
