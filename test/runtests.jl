@@ -1,5 +1,6 @@
 using Hanauta
 
+using Images
 using Measures
 using Plots
 using Statistics
@@ -13,9 +14,20 @@ signal = vec(mean(y, dims=2))
 
 println("creating spectrogram...")
 spc = spectrogram(signal)[:, end-2000:end-800]
+m = 24
+max_spc = max_filter(spc, m)
 peaks = find_peaks(spc)
 
 pairs = find_peak_pairs(peaks, 2, 64)
+
+center_spc = spc[1 + m:end - m, 1 + m:end - m]
+heatmap(center_spc, margin=2mm)
+scatter!(peaks[:, 1], peaks[:, 2], label="", markercolor=:blue)
+savefig("results/plot_peaks.png")
+
+println("saving images...")
+save("results/image.png", colorview(Gray, 1 .- spc))
+save("results/image_max.png", colorview(Gray, 1 .- max_spc))
 
 pairs_for_print = pairs[1:50]
 println(pairs_for_print)

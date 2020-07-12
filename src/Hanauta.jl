@@ -1,11 +1,10 @@
 module Hanauta
 
 using FFTW
-using Images
 using Statistics
 
 
-export spectrogram, generate_hashes, find_peaks, find_peak_pairs, pairs_to_hashes
+export spectrogram, max_filter, generate_hashes, find_peaks, find_peak_pairs, pairs_to_hashes
 
 function hann(window_size)
     ns = 0:window_size
@@ -57,13 +56,7 @@ function find_peaks(spc, m=24)
     peak_flag = (center_spc .== spc_max) .* (center_spc .> mean(center_spc))
     peaks = getindex.(findall(peak_flag), [2 1])
 
-    # heatmap(center_spc, margin=2mm)
-    # scatter!(peaks[:, 1], peaks[:, 2], label="", markercolor=:blue)
-    # savefig("results/plot_peaks.png")
 
-    # println("saving images...")
-    # save("results/image.png", colorview(Gray, 1 .- norm_log_spc))
-    # save("results/image_max.png", colorview(Gray, 1 .- norm_log_spc_max))
     peaks
 end
 
