@@ -13,7 +13,7 @@ function hann(window_size)
     xs_hann
 end
 
-function spectrogram(signal; window_size=1024)
+function spectrogram(signal; window_size=1024, logscale=true, normalize=true)
     overlap = window_size ÷ 2
     rs = 1:(window_size - overlap):Base.length(signal) - window_size
     spc = zeros(overlap + 1, Base.length(rs))
@@ -22,6 +22,17 @@ function spectrogram(signal; window_size=1024)
         rfft_result = rfft(hann_window .* view(signal, idx:idx + window_size))
         spc[:, i] = abs.(rfft_result).^2
     end
+
+    if logscale
+        non_zero = spc .!= 0
+        spc[non_zero] = log10.(spc[non_zero])
+    end
+
+    if normalize
+        min_data, max_data = extrema(spc)
+        spc = @. (spc - min_data)/(max_data - min_data)
+    end
+
     spc
 end
 
@@ -40,14 +51,10 @@ end
 
 function find_peaks(spc, m=24)
     # println("applying max filter...")
-    log_spc = log.(spc)
-    min_data, max_data = extrema(log_spc)
-    norm_log_spc = @. (log_spc - min_data)/(max_data - min_data)
+    spc_max = max_filter(spc, m)
+    center_spc = spc[1 + m:end - m, 1 + m:end - m]
 
-    norm_log_spc_max = max_filter(norm_log_spc, m)
-    center_spc = norm_log_spc[1 + m:end - m, 1 + m:end - m]
-
-    peak_flag = (center_spc .== norm_log_spc_max) .* (center_spc .> mean(center_spc))
+    peak_flag = (center_spc .== spc_max) .* (center_spc .> mean(center_spc))
     peaks = getindex.(findall(peak_flag), [2 1])
 
     # heatmap(center_spc, margin=2mm)
