@@ -43,7 +43,7 @@ function find_peaks(spc, m)
     spc_max = max_filter(spc, m)
     center_spc = spc[1 + m:end - m, 1 + m:end - m]
 
-    peak_flag = (center_spc .== spc_max) .* (center_spc .> mean(center_spc))
+    peak_flag = (center_spc .== spc_max) .* (center_spc .> 0)
     return getindex.(findall(peak_flag), [2 1])
 end
 
