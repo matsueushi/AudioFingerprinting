@@ -15,9 +15,7 @@ signal = vec(mean(y, dims=2))
 println("creating spectrogram...")
 spc = spectrogram(signal)[:, end-2000:end-800]
 m = 24
-max_spc = max_filter(spc, m)
-peaks = find_peaks(spc)
-
+peaks = find_peaks(spc, m)
 pairs = find_peak_pairs(peaks, 2, 64)
 
 center_spc = spc[1 + m:end - m, 1 + m:end - m]
@@ -26,8 +24,10 @@ scatter!(peaks[:, 1], peaks[:, 2], label="", markercolor=:blue)
 savefig("results/plot_peaks.png")
 
 println("saving images...")
-save("results/image.png", colorview(Gray, 1 .- spc))
-save("results/image_max.png", colorview(Gray, 1 .- max_spc))
+min_data, max_data = extrema(spc)
+save("results/image.png", colorview(Gray, @. 1 - (spc - min_data)/(max_data - min_data)))
+max_spc = max_filter(spc, m)
+save("results/image_max.png", colorview(Gray, @. 1 - (max_spc - min_data)/(max_data - min_data)))
 
 pairs_for_print = pairs[1:50]
 println(pairs_for_print)
