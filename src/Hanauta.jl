@@ -29,22 +29,22 @@ function spectrogram(signal; window_size=1024, logscale=true)
     return spc
 end
 
-function max_filter(spc, m)
+function max_filter(spc, nbhd)
     data_max = zero(spc)
-    nx, ny = size(spc) .- 2 .* m
+    nx, ny = size(spc) .- 2 .* nbhd
     for j in 1:ny
-        data_max[:, j] = maximum(view(spc, :, j:j + 2 * m), dims=2)
+        data_max[:, j] = maximum(view(spc, :, j:j + 2 * nbhd), dims=2)
     end
     for i in 1:nx
-        data_max[i, :] = maximum(view(data_max, i:i + 2 * m, :), dims=1)
+        data_max[i, :] = maximum(view(data_max, i:i + 2 * nbhd, :), dims=1)
     end
     return data_max[1:nx, 1:ny]
 end
 
-function find_peaks(spc, m)
+function find_peaks(spc, nbhd)
     # println("applying max filter...")
-    spc_max = max_filter(spc, m)
-    center_spc = spc[1 + m:end - m, 1 + m:end - m]
+    spc_max = max_filter(spc, nbhd)
+    center_spc = spc[1 + nbhd:end - nbhd, 1 + nbhd:end - nbhd]
 
     mask = center_spc .!= minimum(center_spc)
     spc_mean = mean(view(center_spc, mask))
@@ -52,15 +52,18 @@ function find_peaks(spc, m)
     return getindex.(findall(peak_flag), [2 1])
 end
 
-function find_peak_pairs(peaks, start, stop)
+function find_peak_pairs(peaks, fan_value, min_delta, max_delta)
     pairs = Vector{NTuple{4, Int64}}()
     n_peaks = size(peaks, 1)
     for i in 1:n_peaks
         t1, f1 = peaks[i, :]
-        for j in i:n_peaks
-            t2, f2 = peaks[j, :]
-            (t1 + start < t2 && t2 < t1 + stop) || continue
-            push!(pairs, (t1, t2, f1, f2))
+        for j in 1:fan_value
+            if i + j <= n_peaks
+                t2, f2 = peaks[i + j, :]
+                time_delta = t2 - t1
+                (min_delta <= time_delta && time_delta <= max_delta) || continue
+                push!(pairs, (t1, t2, f1, f2))
+            end
         end
     end
     return pairs
