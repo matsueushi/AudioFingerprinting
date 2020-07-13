@@ -4,11 +4,12 @@ using FFTW
 using Statistics
 
 
-export spectrogram, max_filter, find_peaks, find_peak_pairs, pairs_to_hashes
+export max_filter, generate_spectrogram, PeakInfo
 
 hann(window_size) = @. 0.5 * (1 - cos(2π * (0:window_size) / window_size))
 
-function spectrogram(signal; window_size=1024, logscale=true)
+function generate_spectrogram(sample; window_size=1024, logscale=true)
+    signal = vec(mean(sample, dims=2))
     overlap = window_size ÷ 2
     rs = 1:(window_size - overlap):Base.length(signal) - window_size
     spc = zeros(overlap + 1, Base.length(rs))
@@ -42,7 +43,6 @@ function max_filter(spc, nbhd)
 end
 
 function find_peaks(spc, nbhd)
-    # println("applying max filter...")
     spc_max = max_filter(spc, nbhd)
     center_spc = spc[1 + nbhd:end - nbhd, 1 + nbhd:end - nbhd]
 
@@ -76,6 +76,19 @@ function pairs_to_hashes(pairs)
         hash_dict[hash] = t1
     end
     return hash_dict
+end
+
+struct PeakInfo
+    peaks::Matrix{Int64}
+    park_pairs::Vector{NTuple{4, Int64}}
+    hash_dict::Dict{UInt32, UInt32}
+end
+
+function PeakInfo(spectrogram::Matrix{Float64}, nbhd::Integer)
+    peaks = find_peaks(spectrogram, nbhd)
+    peak_pairs = find_peak_pairs(peaks, 5, 0, 200)
+    hash_dict = pairs_to_hashes(peak_pairs)
+    return PeakInfo(peaks, peak_pairs, hash_dict)
 end
 
 end # module
