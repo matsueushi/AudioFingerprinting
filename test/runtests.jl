@@ -26,15 +26,16 @@ end
 @testset "original vs recorded" begin
     original_name = "wav/original.wav"
     recorded_name = "wav/recorded.wav"
-    nbhd = 24
+    nbhd = 20
+    window = 4096
 
     y1, _, _, _ = wavread(original_name)
-    spc1 = generate_spectrogram(y1)
+    spc1 = generate_spectrogram(y1, window)
     signal_info1 = PeakInfo(spc1, nbhd)
     plot_peaks("results/peak_original.png", spc1, signal_info1, nbhd)
 
     y2, _, _, _ = wavread(recorded_name)
-    spc2 = generate_spectrogram(y2)
+    spc2 = generate_spectrogram(y2, window)
     signal_info2 = PeakInfo(spc2, nbhd)
     plot_peaks("results/peak_recorded.png", spc2, signal_info2, nbhd)
 end

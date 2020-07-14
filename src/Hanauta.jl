@@ -8,7 +8,7 @@ export max_filter, generate_spectrogram, PeakInfo
 
 hann(window_size) = @. 0.5 * (1 - cos(2π * (0:window_size) / window_size))
 
-function generate_spectrogram(sample; window_size=1024, logscale=true)
+function generate_spectrogram(sample, window_size; logscale=true)
     signal = vec(mean(sample, dims=2))
     overlap = window_size ÷ 2
     rs = 1:(window_size - overlap):Base.length(signal) - window_size
