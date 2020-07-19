@@ -41,42 +41,34 @@ end
 end
 
 
-# @testset "test1" begin
-#     wav_name = "wav/03 Roots Of Summer.wav"
+@testset "hash matching" begin
+    original_name = "wav/original.wav"
+    recorded_name = "wav/recorded.wav"
+    nbhd = 20
+    window = 4096
 
-#     println("loading wav...")
-#     y, _, _, _ = wavread(wav_name)
-#     nbhd = 24
-#     println("initializing...")
-#     spc1 = generate_spectrogram(y)[:, end-500:end-120]
-#     signal_info1 = PeakInfo(spc1, nbhd)
-#     println("complete.")
+    y1, _, _, _ = wavread(original_name)
+    spc1 = generate_spectrogram(y1, window)
+    signal_info1 = PeakInfo(spc1, nbhd)
 
-#     plot_peaks("results/plot_peaks.png", spc1, signal_info1, nbhd)
-#     plot_max_filter("results/image.png", "results/image_max.png", spc1, nbhd)
+    y2, _, _, _ = wavread(recorded_name)
+    spc2 = generate_spectrogram(y2, window)
+    signal_info2 = PeakInfo(spc2, nbhd)
+ 
+    # plot_max_filter("results/image.png", "results/image_max.png", spc1, nbhd)
 
-#     # pairs_for_print = pairs
-#     # for (t1, t2, f1, f2) in pairs_for_print
-#     #     println("Hash:time = [", f1, ":", f2, ":", t2 - t1, "]:", t1)
-#     #     println(bitstring(f1)[end-9:end], ",", bitstring(f2)[end-9:end], ",", bitstring(t2 - t1)[end-9:end])
-#     # end
+    # pairs_for_print = pairs
+    # for (t1, t2, f1, f2) in pairs_for_print
+    #     println("Hash:time = [", f1, ":", f2, ":", t2 - t1, "]:", t1)
+    #     println(bitstring(f1)[end-9:end], ",", bitstring(f2)[end-9:end], ",", bitstring(t2 - t1)[end-9:end])
+    # end
 
-#     wav_name2 = "wav/roots.wav"
-
-#     println("loading wav...")
-#     y2, _, _, _ = wavread(wav_name)
-#     signal2 = vec(mean(y2, dims=2))
-
-#     println("creating spectrogram...")
-#     spc2 = generate_spectrogram(signal2)
-#     signal_info2 = PeakInfo(spc2, nbhd)
-
-#     println("hash matching")
-#     ret = []
-#     for h in signal_info2.hash_dict
-#         if haskey(signal_info1.hash_dict, h)
-#             push!(ret, signal_info1.hash_dict[h], signal_info2.hashe_dict[h])
-#         end
-#     end
-#     println(ret)
-# end
+    println("hash matching...")
+    ret = []
+    for h in signal_info2.hash_dict
+        if haskey(signal_info1.hash_dict, h)
+            push!(ret, signal_info1.hash_dict[h], signal_info2.hashe_dict[h])
+        end
+    end
+    println(ret)
+end
