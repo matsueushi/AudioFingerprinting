@@ -1,7 +1,7 @@
 module Hanauta
 
-include("filters.jl")
+include("peaks.jl")
 
-export maximum_filter
+export maximum_filter, find_peaks
 
 end # module

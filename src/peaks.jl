@@ -13,3 +13,8 @@ function maximum_filter(matrix, filter_size)
     end
     return result
 end
+
+function find_peaks(matrix, filter_size)
+    matrix_max = maximum_filter(matrix, filter_size)
+    return matrix_max .== matrix
+end
