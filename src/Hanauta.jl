@@ -1,5 +1,7 @@
 module Hanauta
 
-print("hello!")
+include("filters.jl")
+
+export maximum_filter
 
 end # module
