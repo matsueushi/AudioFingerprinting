@@ -28,11 +28,12 @@
                      0 1 0 0 0 0 0;
                      0 1 0 1 0 1 0;
                      1 0 0 0 0 0 0]
-        fs, ts = Hanauta.getmaskindex(peaks)
+        freqs, times = Hanauta.getmaskindex(peaks)
+        @test (freqs, times) == ([5, 3, 4, 2, 2, 4, 4], [1, 2, 2, 3, 4, 4, 6])
         fanvalue = 2
         mindelta = 0
         maxdelta = 1
-        hashdict = hashpeaks(fs, ts, fanvalue, mindelta, maxdelta)
+        hashdict = hashpeaks(freqs, times, fanvalue, mindelta, maxdelta)
         hashdict == Dict("db724d0a500003163dce50a08d4cb5199d837df32ff9bea778229f6f89e0ec49" => 2,
                          "9fc7745cc33e507d9ad28f16e9bd8d717b0de72ed078424da70292feb19248e4" => 1,
                          "3533f2977e2cb6bb57e7135baff39dbb15e418fa6e7841216ebb6979110a5da4" => 2,

@@ -4,6 +4,7 @@ using SHA
 using DSP
 
 include("peaks.jl")
+include("spectrogram.jl")
 
 export maxfilter, findpeaks, hashpeaks, songspectrogram
 

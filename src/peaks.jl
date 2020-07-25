@@ -16,9 +16,9 @@ end
 
 function getmaskindex(mask)
     maskindex = getindex.(findall(mask), [1 2])
-    fs = maskindex[:, 1]
-    ts = maskindex[:, 2]
-    return fs, ts
+    freqs = maskindex[:, 1]
+    times = maskindex[:, 2]
+    return freqs, times
 end
 
 function findpeaks(matrix, filtersize)
@@ -27,20 +27,20 @@ function findpeaks(matrix, filtersize)
     return getmaskindex(mask)
 end
 
-function hashpeaks(fs, ts, fanvalue, mindelta, maxdelta)
+function hashpeaks(freqs, times, fanvalue, mindelta, maxdelta)
     hashdict = Dict{String, Int64}()
-    nts = Base.length(ts)
-    # println(ts)
-    # println(fs)
-    for (i1, t1) in pairs(IndexLinear(), ts)
-        f1 = fs[i1]
+    ntimes = Base.length(times)
+    # println(times)
+    # println(freqs)
+    for (i1, t1) in pairs(IndexLinear(), times)
+        f1 = freqs[i1]
         for i in 1:fanvalue
             i2 = i1 + i
-            i2 > nts && break
-            t2 = ts[i2]
+            i2 > ntimes && break
+            t2 = times[i2]
             dt = t2 - t1
             (mindelta <= dt && dt <= maxdelta) || continue
-            f2 = fs[i2]
+            f2 = freqs[i2]
             info = "$f1|$f2|$dt"
             hash = bytes2hex(sha256(info))
             # println("($t1, $f1) - ($t2, $f2), $info [$hash] -> $t1")
