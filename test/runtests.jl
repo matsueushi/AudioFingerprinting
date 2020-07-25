@@ -8,6 +8,7 @@ using Hanauta
          0.83 0.54 0.57 0.96 0.50;
          0.56 0.40 0.79 0.69 0.43;
          0.47 0.61 0.10 0.18 0.88]
+         
     @testset "maxfilter" begin
         @test maxfilter(x, 2) == [0.98 0.98 0.98 0.67 0.63;
                                   0.98 0.98 0.98 0.96 0.96;
@@ -22,7 +23,7 @@ using Hanauta
     end
 
     @testset "findpeaks" begin
-        @test findpeaks(x, 2) == ([2, 3, 5], [2, 4, 5]);
+        @test findpeaks(x, 2) == ([2, 3, 5], [2, 4, 5])
     end
 
     @testset "pairingpeaks" begin
