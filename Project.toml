@@ -2,3 +2,6 @@ name = "Hanauta"
 uuid = "a7410831-a0f0-49ce-9f43-9964fb435d26"
 authors = ["matsueushi <matsueushi@gmail.com>"]
 version = "0.1.0"
+
+[deps]
+SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"

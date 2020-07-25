@@ -1,5 +1,7 @@
 module Hanauta
 
-print("hello!")
+include("peaks.jl")
+
+export maxfilter, findpeaks, hashpeaks
 
 end # module
