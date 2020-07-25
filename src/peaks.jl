@@ -1,4 +1,4 @@
-function maximum_filter(matrix, filter_size)
+function maxfilter(matrix, filter_size)
     temp, result = zero(matrix), zero(matrix)
     n1, n2 = size(matrix)
     for i in 1:n1
@@ -14,7 +14,9 @@ function maximum_filter(matrix, filter_size)
     return result
 end
 
-function find_peaks(matrix, filter_size)
-    matrix_max = maximum_filter(matrix, filter_size)
-    return matrix_max .== matrix
+function findpeaks(matrix, filter_size)
+    matrix_max = maxfilter(matrix, filter_size)
+    mask = matrix_max .== matrix
+    maskindex = getindex.(findall(mask), [1 2])
+    return maskindex[:, 1], maskindex[:, 2]
 end
