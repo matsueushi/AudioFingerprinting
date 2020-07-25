@@ -1,5 +1,3 @@
-using SHA
-
 function maxfilter(matrix, filtersize)
     temp, result = zero(matrix), zero(matrix)
     n1, n2 = size(matrix)
