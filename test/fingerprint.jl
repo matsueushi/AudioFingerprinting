@@ -11,4 +11,3 @@ function plot_spectrogram(input, output, n, filtersize)
     scatter!(times, freqs, label="")
     savefig(output)
 end
-
