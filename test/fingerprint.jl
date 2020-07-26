@@ -1,4 +1,4 @@
-# using Plots
+using Plots
 using Statistics
 using WAV
 
@@ -7,9 +7,9 @@ function test_fingerprint(input, output, n, filtersize, fanvalue, mindelta, maxd
     samples = vec(mean(ys, dims=2))
     spec = songspectrogram(samples, n, fs)
     freqs, times = findpeaks(spec, filtersize)
-    # heatmap(spec)
-    # scatter!(times, freqs, label="")
-    # savefig(output)
+    heatmap(spec)
+    scatter!(times, freqs, label="")
+    savefig(output)
     return fingerprint(samples, n, fs, filtersize, fanvalue, mindelta, maxdelta)
 end
 
