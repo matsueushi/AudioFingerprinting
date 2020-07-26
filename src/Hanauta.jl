@@ -1,6 +1,7 @@
 module Hanauta
 
 using SHA
+using Statistics
 using DSP
 
 include("peaks.jl")

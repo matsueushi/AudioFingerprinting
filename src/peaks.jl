@@ -23,8 +23,9 @@ end
 
 function findpeaks(matrix, filtersize)
     maxmatrix = maxfilter(matrix, filtersize)
-    mask = maxmatrix .== matrix
-    return getmaskindex(mask)
+    maxmask = maxmatrix .== matrix
+    meanmask = matrix .> mean(matrix)
+    return getmaskindex(maxmask .* meanmask)
 end
 
 function hashpeaks(freqs, times, fanvalue, mindelta, maxdelta)
