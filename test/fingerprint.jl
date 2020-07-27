@@ -21,7 +21,7 @@ end
     n = 4096
     filtersize = 10
     fanvalue = 5
-    mindelta = 0
+    mindelta = 1
     maxdelta = 100
 
     input1 = joinpath(@__DIR__, "data/original.wav")
@@ -34,11 +34,18 @@ end
     hash2 = test_fingerprint(input2, output2, n, filtersize, fanvalue, mindelta, maxdelta)
 
     i = 0
-    for h in hash2
-        if h in hash1
-            println(h)
+    ts1 = Vector{Int64}()
+    ts2 = Vector{Int64}()
+    for h in keys(hash2)
+        if haskey(hash1, h)
+            push!(ts1, hash1[h])
+            push!(ts2, hash2[h])
             i += 1
         end
     end
     println("Match: $i")
+    if i > 0
+        scatter(ts1, ts2)
+        savefig(joinpath(@__DIR__, "output/scatter.png"))
+    end
 end
