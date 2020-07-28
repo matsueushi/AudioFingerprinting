@@ -28,27 +28,29 @@ function findpeaks(matrix, filtersize)
     return getmaskindex(maxmask .* meanmask)
 end
 
-function paringpeaks(peaks, fanvalue, timerange)
+function paringpeaks(peaks, fanvalue, timerange, freqrange)
     data = Vector{NTuple{4, Int64}}()
     ntimes = Base.length(peaks)
     # println(peaks)
-    mindelta, maxdelta = timerange
+    mintdelta, maxtdelta = timerange
+    minfdelta, maxfdelta = freqrange
     for (i1, (t1, f1)) in pairs(IndexLinear(), peaks)
         for i in 1:fanvalue
             i2 = i1 + i
             i2 > ntimes && break
             t2, f2 = peaks[i2]
             dt = t2 - t1
-            (mindelta <= dt && dt <= maxdelta) || continue
+            df = f2 - f1
+            (mintdelta <= dt && dt <= maxtdelta && minfdelta <= df && df <= maxfdelta) || continue
             push!(data, (f1, f2, dt, t1))
         end
     end
     return data
 end
 
-function hashpeaks(peaks, fanvalue, timerange)
+function hashpeaks(peaks, fanvalue, timerange, freqrange)
     hashdict = Dict{String, Int64}()
-    pairs = paringpeaks(peaks, fanvalue, timerange)
+    pairs = paringpeaks(peaks, fanvalue, timerange, freqrange)
     for (f1, f2, dt, t1) in pairs
         info = "$f1|$f2|$dt"
         hash = bytes2hex(sha256(info))
