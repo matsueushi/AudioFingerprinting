@@ -1,4 +1,3 @@
-using OrderedCollections
 using Test
 
 using Hanauta
