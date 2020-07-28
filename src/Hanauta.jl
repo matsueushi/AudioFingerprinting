@@ -1,5 +1,6 @@
 module Hanauta
 
+using OrderedCollections
 using SHA
 using Statistics
 using DSP

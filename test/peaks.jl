@@ -22,7 +22,7 @@
         @testset "findpeaks" begin
             peaks = findpeaks(x, 2)
             @test peaks == [(2, 2), (4, 3), (5, 5)] 
-            @test Hanauta.peakdict(peaks) == Dict(2 => [2], 4 => [3], 5 => [5])
+            @test Hanauta.peakdict(peaks) == OrderedDict(2 => [2], 4 => [3], 5 => [5])
         end
     end
 

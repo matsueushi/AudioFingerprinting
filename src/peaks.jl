@@ -29,7 +29,7 @@ function findpeaks(matrix, filtersize)
 end
 
 function peakdict(peaks)
-    dict = Dict{Int64, Vector{Int64}}()
+    dict = OrderedDict{Int64, Vector{Int64}}()
     for (k, v) in peaks
         push!(get!(dict, k, []), v)
     end
