@@ -2,27 +2,26 @@ using Plots
 using Statistics
 using WAV
 
-function test_fingerprint(input, output, n, filtersize, fanvalue, mindelta, maxdelta)
+function test_fingerprint(input, output, n, filtersize, fanvalue, timerange)
     ys, fs, _, _ = wavread(input)
     samples = vec(mean(ys, dims=2))[100000:300000]
     spec = songspectrogram(samples, n, fs)
     peaks = findpeaks(spec, filtersize)
-    pairs = Hanauta.paringpeaks(peaks, fanvalue, mindelta, maxdelta)
+    pairs = Hanauta.paringpeaks(peaks, fanvalue, timerange)
     heatmap(spec)
     for (f1, f2, dt, t1) in pairs
         plot!([t1, t1 + dt], [f1, f2], label="", linecolor=:blue)
     end
     scatter!(peaks, label="")
     savefig(output)
-    return fingerprint(samples, n, fs, filtersize, fanvalue, mindelta, maxdelta)
+    return fingerprint(samples, n, fs, filtersize, fanvalue, timerange)
 end
 
 @testset "fingerprint" begin
     n = 4096
     filtersize = 10
     fanvalue = 5
-    mindelta = 1
-    maxdelta = 100
+    timerange = 1 => 10
 
     input1 = joinpath(@__DIR__, "data/original.wav")
     output1 = joinpath(@__DIR__, "output/result_original.png")
@@ -30,8 +29,8 @@ end
     input2 = joinpath(@__DIR__, "data/recorded.wav")
     output2 = joinpath(@__DIR__, "output/result_recorded.png")
 
-    hash1 = test_fingerprint(input1, output1, n, filtersize, fanvalue, mindelta, maxdelta)
-    hash2 = test_fingerprint(input2, output2, n, filtersize, fanvalue, mindelta, maxdelta)
+    hash1 = test_fingerprint(input1, output1, n, filtersize, fanvalue, timerange)
+    hash2 = test_fingerprint(input2, output2, n, filtersize, fanvalue, timerange)
 
     i = 0
     ts1 = Vector{Int64}()

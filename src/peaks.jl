@@ -36,10 +36,11 @@ function peakdict(peaks)
     return dict
 end
 
-function paringpeaks(peaks, fanvalue, mindelta, maxdelta)
+function paringpeaks(peaks, fanvalue, timerange)
     data = Vector{NTuple{4, Int64}}()
     ntimes = Base.length(peaks)
     # println(peaks)
+    mindelta, maxdelta = timerange
     for (i1, (t1, f1)) in pairs(IndexLinear(), peaks)
         for i in 1:fanvalue
             i2 = i1 + i
@@ -53,9 +54,9 @@ function paringpeaks(peaks, fanvalue, mindelta, maxdelta)
     return data
 end
 
-function hashpeaks(peaks, fanvalue, mindelta, maxdelta)
+function hashpeaks(peaks, fanvalue, timerange)
     hashdict = Dict{String, Int64}()
-    pairs = paringpeaks(peaks, fanvalue, mindelta, maxdelta)
+    pairs = paringpeaks(peaks, fanvalue, timerange)
     for (f1, f2, dt, t1) in pairs
         info = "$f1|$f2|$dt"
         hash = bytes2hex(sha256(info))

@@ -4,9 +4,9 @@ function songspectrogram(samples, n, fs)
     return normspec
 end
 
-function fingerprint(samples, n, fs, filtersize, fanvalue, mindelta, maxdelta)
+function fingerprint(samples, n, fs, filtersize, fanvalue, timerange)
     spec = songspectrogram(samples, n, fs)
     peaks = findpeaks(spec, filtersize)
-    hashdict = hashpeaks(peaks, fanvalue, mindelta, maxdelta)
+    hashdict = hashpeaks(peaks, fanvalue, timerange)
     return hashdict
 end
