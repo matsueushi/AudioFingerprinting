@@ -6,7 +6,7 @@ end
 
 function fingerprint(samples, n, fs, filtersize, fanvalue, mindelta, maxdelta)
     spec = songspectrogram(samples, n, fs)
-    freqs, times = findpeaks(spec, filtersize)
-    hashdict = hashpeaks(freqs, times, fanvalue, mindelta, maxdelta)
+    peaks = findpeaks(spec, filtersize)
+    hashdict = hashpeaks(peaks, fanvalue, mindelta, maxdelta)
     return hashdict
 end

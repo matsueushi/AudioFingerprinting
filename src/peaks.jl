@@ -18,7 +18,7 @@ function getmaskindex(mask)
     maskindex = getindex.(findall(mask), [1 2])
     freqs = maskindex[:, 1]
     times = maskindex[:, 2]
-    return freqs, times
+    return collect(zip(times, freqs))
 end
 
 function findpeaks(matrix, filtersize)
@@ -28,29 +28,26 @@ function findpeaks(matrix, filtersize)
     return getmaskindex(maxmask .* meanmask)
 end
 
-function paringpeaks(freqs, times, fanvalue, mindelta, maxdelta)
+function paringpeaks(peaks, fanvalue, mindelta, maxdelta)
     data = Vector{NTuple{4, Int64}}()
-    ntimes = Base.length(times)
-    # println(times)
-    # println(freqs)
-    for (i1, t1) in pairs(IndexLinear(), times)
-        f1 = freqs[i1]
+    ntimes = Base.length(peaks)
+    # println(peaks)
+    for (i1, (t1, f1)) in pairs(IndexLinear(), peaks)
         for i in 1:fanvalue
             i2 = i1 + i
             i2 > ntimes && break
-            t2 = times[i2]
+            t2, f2 = peaks[i2]
             dt = t2 - t1
             (mindelta <= dt && dt <= maxdelta) || continue
-            f2 = freqs[i2]
             push!(data, (f1, f2, dt, t1))
         end
     end
     return data
 end
 
-function hashpeaks(freqs, times, fanvalue, mindelta, maxdelta)
+function hashpeaks(peaks, fanvalue, mindelta, maxdelta)
     hashdict = Dict{String, Int64}()
-    pairs = paringpeaks(freqs, times, fanvalue, mindelta, maxdelta)
+    pairs = paringpeaks(peaks, fanvalue, mindelta, maxdelta)
     for (f1, f2, dt, t1) in pairs
         info = "$f1|$f2|$dt"
         hash = bytes2hex(sha256(info))

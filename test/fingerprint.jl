@@ -4,15 +4,15 @@ using WAV
 
 function test_fingerprint(input, output, n, filtersize, fanvalue, mindelta, maxdelta)
     ys, fs, _, _ = wavread(input)
-    samples = vec(mean(ys, dims=2))[1:100000]
+    samples = vec(mean(ys, dims=2))[100000:300000]
     spec = songspectrogram(samples, n, fs)
-    freqs, times = findpeaks(spec, filtersize)
-    pairs = Hanauta.paringpeaks(freqs, times, fanvalue, mindelta, maxdelta)
+    peaks = findpeaks(spec, filtersize)
+    pairs = Hanauta.paringpeaks(peaks, fanvalue, mindelta, maxdelta)
     heatmap(spec)
     for (f1, f2, dt, t1) in pairs
         plot!([t1, t1 + dt], [f1, f2], label="", linecolor=:blue)
     end
-    scatter!(times, freqs, label="")
+    scatter!(peaks, label="")
     savefig(output)
     return fingerprint(samples, n, fs, filtersize, fanvalue, mindelta, maxdelta)
 end
