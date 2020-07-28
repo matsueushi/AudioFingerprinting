@@ -28,6 +28,14 @@ function findpeaks(matrix, filtersize)
     return getmaskindex(maxmask .* meanmask)
 end
 
+function peakdict(peaks)
+    dict = Dict{Int64, Vector{Int64}}()
+    for (k, v) in peaks
+        push!(get!(dict, k, []), v)
+    end
+    return dict
+end
+
 function paringpeaks(peaks, fanvalue, mindelta, maxdelta)
     data = Vector{NTuple{4, Int64}}()
     ntimes = Base.length(peaks)
