@@ -1,7 +1,12 @@
 module Hanauta
 
-include("peaks.jl")
+using SHA
+using Statistics
+using DSP
 
-export maxfilter, findpeaks, hashpeaks
+include("peaks.jl")
+include("fingerprint.jl")
+
+export maxfilter, findpeaks, hashpeaks, songspectrogram, fingerprint
 
 end # module

@@ -1,5 +1,3 @@
-using SHA
-
 function maxfilter(matrix, filtersize)
     temp, result = zero(matrix), zero(matrix)
     n1, n2 = size(matrix)
@@ -18,36 +16,47 @@ end
 
 function getmaskindex(mask)
     maskindex = getindex.(findall(mask), [1 2])
-    fs = maskindex[:, 1]
-    ts = maskindex[:, 2]
-    return fs, ts
+    freqs = maskindex[:, 1]
+    times = maskindex[:, 2]
+    return collect(zip(times, freqs))
 end
 
 function findpeaks(matrix, filtersize)
     maxmatrix = maxfilter(matrix, filtersize)
-    mask = maxmatrix .== matrix
-    return getmaskindex(mask)
+    maxmask = maxmatrix .== matrix
+    meanmask = matrix .> mean(matrix)
+    return getmaskindex(maxmask .* meanmask)
 end
 
-function hashpeaks(fs, ts, fanvalue, mindelta, maxdelta)
-    hashdict = Dict{String, Int64}()
-    nts = Base.length(ts)
-    # println(ts)
-    # println(fs)
-    for (i1, t1) in pairs(IndexLinear(), ts)
-        f1 = fs[i1]
+function paringpeaks(peaks, fanvalue, timerange, freqrange)
+    data = Vector{NTuple{4, Int64}}()
+    ntimes = Base.length(peaks)
+    # println(peaks)
+    mintdelta, maxtdelta = timerange
+    minfdelta, maxfdelta = freqrange
+    for (i1, (t1, f1)) in pairs(IndexLinear(), peaks)
         for i in 1:fanvalue
             i2 = i1 + i
-            i2 > nts && break
-            t2 = ts[i2]
+            i2 > ntimes && break
+            t2, f2 = peaks[i2]
             dt = t2 - t1
-            (mindelta <= dt && dt <= maxdelta) || continue
-            f2 = fs[i2]
-            info = "$f1|$f2|$dt"
-            hash = bytes2hex(sha256(info))
-            # println("($t1, $f1) - ($t2, $f2), $info [$hash] -> $t1")
-            hashdict[hash] = t1
+            df = f2 - f1
+            (mintdelta <= dt && dt <= maxtdelta) || break
+            (minfdelta <= df && df <= maxfdelta) || continue
+            push!(data, (f1, f2, dt, t1))
         end
+    end
+    return data
+end
+
+function hashpeaks(peaks, fanvalue, timerange, freqrange)
+    hashdict = Dict{String, Int64}()
+    pairs = paringpeaks(peaks, fanvalue, timerange, freqrange)
+    for (f1, f2, dt, t1) in pairs
+        info = "$f1|$f2|$dt"
+        hash = bytes2hex(sha256(info))
+        hashdict[hash] = t1
+        # println("($t1, $f1) - ($t2, $f2), $info [$hash] -> $t1")
     end
     return hashdict
 end
