@@ -7,12 +7,12 @@
             0.47 0.61 0.10 0.18 0.88]
 
         @testset "maxfilter" begin
-            @test maxfilter(x, 2) == [0.98 0.98 0.98 0.67 0.63;
+            @test maxfilter(x, 1) == [0.98 0.98 0.98 0.67 0.63;
                                     0.98 0.98 0.98 0.96 0.96;
                                     0.98 0.98 0.98 0.96 0.96;
                                     0.83 0.83 0.96 0.96 0.96;
                                     0.61 0.79 0.79 0.88 0.88]
-            @test maxfilter(x, 3) == [0.98 0.98 0.98 0.98 0.96;
+            @test maxfilter(x, 2) == [0.98 0.98 0.98 0.98 0.96;
                                     0.98 0.98 0.98 0.98 0.96;
                                     0.98 0.98 0.98 0.98 0.96;
                                     0.98 0.98 0.98 0.98 0.96;
@@ -20,14 +20,14 @@
         end
 
         @testset "findpeaks" begin
-            peaks = findpeaks(x, 2)
+            peaks = findpeaks(x, 1)
             @test peaks == [(2, 2), (4, 3), (5, 5)] 
         end
     end
 
     @testset "background" begin
         x = zeros(5, 6); x[2, 2] = 1.
-        @test findpeaks(x, 2) == [(2, 2)]
+        @test findpeaks(x, 1) == [(2, 2)]
     end
 
     @testset "hashpeaks" begin
