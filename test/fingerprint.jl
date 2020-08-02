@@ -37,7 +37,7 @@ end
     end
     println("Match: $i")
     if i > 0
-        scatter(ts1, ts2)
+        scatter(ts1, ts2, aspect_ratio=1., label="")
         savefig(joinpath(@__DIR__, "output/scatter.png"))
     end
 end
