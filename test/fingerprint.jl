@@ -1,23 +1,12 @@
 using Plots
-using Statistics
 using WAV
+
 
 function plot_fingerprint(input, n, filtersize, fanvalue, timerange, freqrange)
     ys, fs, _, _ = wavread(input)
-    samples = view(ys, 100000:300000, 1)
-    spec = songspectrogram(samples, n, fs)
-    peaks = findpeaks(spec, filtersize)
-    pairs = Hanauta.paringpeaks(peaks, fanvalue, timerange, freqrange)
-    heatmap(spec)
-    for (f1, f2, dt, t1) in pairs
-        plot!([t1, t1 + dt], [f1, f2], label="", linecolor=:blue)
-    end
-    scatter!(peaks, label="")
+    ysview = view(ys, 100000:300000, :)
     path, _ = splitext(input)
-    println(path)
-    output = path * "_ch1.png"
-    savefig(output)
-    return fingerprint(samples, n, fs, filtersize, fanvalue, timerange, freqrange)
+    return fingerprint_song(ysview, fs, n, filtersize, fanvalue, timerange, freqrange; path = path)
 end
 
 @testset "fingerprint" begin

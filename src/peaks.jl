@@ -2,13 +2,13 @@ function maxfilter(matrix, filtersize)
     temp, result = zero(matrix), zero(matrix)
     n1, n2 = size(matrix)
     for i in 1:n1
-        imin = max(i - (filtersize - 1), 1)
-        imax = min(i + (filtersize - 1), n1)
+        imin = max(i - filtersize, 1)
+        imax = min(i + filtersize, n1)
         temp[i, :] = maximum(view(matrix, imin:imax, :), dims=1)
     end
     for j in 1:n2
-        jmin = max(j - (filtersize - 1), 1)
-        jmax = min(j + (filtersize - 1), n2)
+        jmin = max(j - filtersize, 1)
+        jmax = min(j + filtersize, n2)
         result[:, j] = maximum(view(temp, :, jmin:jmax), dims=2)
     end
     return result
@@ -24,8 +24,10 @@ end
 function findpeaks(matrix, filtersize)
     maxmatrix = maxfilter(matrix, filtersize)
     maxmask = maxmatrix .== matrix
-    meanmask = matrix .> mean(matrix)
-    return getmaskindex(maxmask .* meanmask)
+    mmin, mmax = extrema(matrix)
+    threshold = mmin + (mmax - mmin) / 4
+    nobackground = matrix .> threshold
+    return getmaskindex(maxmask .* nobackground)
 end
 
 function paringpeaks(peaks, fanvalue, timerange, freqrange)
@@ -41,8 +43,7 @@ function paringpeaks(peaks, fanvalue, timerange, freqrange)
             t2, f2 = peaks[i2]
             dt = t2 - t1
             df = f2 - f1
-            (mintdelta <= dt && dt <= maxtdelta) || break
-            (minfdelta <= df && df <= maxfdelta) || continue
+            (mintdelta <= dt && dt <= maxtdelta && minfdelta <= df && df <= maxfdelta) || continue
             push!(data, (f1, f2, dt, t1))
         end
     end
