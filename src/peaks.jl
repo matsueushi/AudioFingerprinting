@@ -24,9 +24,7 @@ end
 function findpeaks(matrix, filtersize)
     maxmatrix = maxfilter(matrix, filtersize)
     maxmask = maxmatrix .== matrix
-    mmin, mmax = extrema(matrix)
-    threshold = mmin + (mmax - mmin) / 4
-    nobackground = matrix .> threshold
+    nobackground = matrix .!= minimum(matrix)
     return getmaskindex(maxmask .* nobackground)
 end
 
