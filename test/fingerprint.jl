@@ -37,7 +37,7 @@ end
     n = 4096
     filtersize = 10
     fanvalue = 50
-    timerange = 0 => 20
+    timerange = 1 => 20
     freqrange = -200 => 200
 
     input1 = joinpath(@__DIR__, "data/04 Buddy Holly.wav")
